@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dolby.io Real-time Streaming Token API Tutorial</title>
+</head>
+
+<body>
+    <label for="streamName">Stream Name</label>
+    <input id="streamName" type="text" value="test" />
+    <button onclick="createToken()">Create Token</button>
+    <script>
+        async function createToken() {
+            const name = document.getElementById("streamName").value;
+            console.log("createToken", name);
+            if (name == null || name.length === 0) return;
+
+            const data = {
+                label: name,
+                streams: [{ streamName: name }],
+            };
+
+            const fetchResponse = await fetch("/millicast/createToken", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const response = await fetchResponse.json();
+            console.log(response);
+        }
+    </script>
+</body>
+
+</html>
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video Chat</title>
+    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
+</head>
+
+<body>
+    <div id="publisher"></div>
+    <div id="subscriber"></div>
+
+    <script>
+        const apiKey = data.apiKey;
+        const sessionId = data.sessionId;
+        const token = data.token;
+
+        const session = OT.initSession(apiKey, sessionId);
+
+        session.on('streamCreated', event => {
+            session.subscribe(event.stream, 'subscriber', {
+                insertMode: 'append',
+                width: '100%',
+                height: '100%'
+            });
+        });
+
+        const publisher = OT.initPublisher('publisher', {
+            insertMode: 'append',
+            width: '100%',
+            height: '100%'
+        });
+
+        session.connect(token, err => {
+            if (err) {
+                console.error('Failed to connect', err);
+            } else {
+                session.publish(publisher);
+            }
+        });
+    </script>
+</body>
+
+</html> -->

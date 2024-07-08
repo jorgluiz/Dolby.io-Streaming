@@ -7,11 +7,23 @@ const path = require("path");
 const open = require("open");
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+const RedisStore = require('connect-redis').default;
 const Redis = require('redis');
 
+const app = express();
+
 // Configuração do Redis
-const redisClient = new Redis(process.env.REDIS_URL);
+const redisClient = Redis.createClient({
+    url: process.env.REDIS_URL
+});
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+
+// Conectar o cliente Redis
+async function connectRedis() {
+    await redisClient.connect();
+}
+connectRedis().catch(console.error);
+
 app.use(session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -20,15 +32,7 @@ app.use(session({
     cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
-const app = express();
 
-// Configuração de sessão
-app.use(session({
-    secret: 'your-secret-key',  // Altere para uma chave secreta mais segura em produção
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }  // Defina como true se estiver usando HTTPS
-}));
 
 let publisherData = {};  // Adiciona uma variável global para armazenar dados do publisher
 

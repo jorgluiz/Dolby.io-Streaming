@@ -79,9 +79,9 @@ app.post('/millicast/:endpoint', (req, res) => {
         case 'createToken':
             createToken(req.body)
                 .then((data) => {
-                    const parsedData = JSON.parse(data);
-                    salvarDadosNoDatabase(parsedData)
-                    res.json(parsedData);  // Envia a resposta como JSON
+                    // const parsedData = JSON.parse(data);
+                    // salvarDadosNoDatabase(parsedData)
+                    res.json(JSON.parse(data));  // Envia a resposta como JSON
                 })
                 .catch((err) => {
                     res.status(500).json({ status: 'fail', data: err });

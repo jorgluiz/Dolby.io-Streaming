@@ -7,7 +7,17 @@ const path = require("path");
 const open = require("open");
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const Redis = require('redis');
 
+// Configuração do Redis
+const redisClient = new Redis(process.env.REDIS_URL);
+app.use(session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+}));
 
 const app = express();
 
@@ -38,10 +48,10 @@ const defaultOptions = {
 };
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+const httpsOptions = {
+    key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+};
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -131,16 +141,16 @@ app.get('/viewer', (req, res) => {
 });
 
 // Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(port, (err) => {
-//     if (err) throw err;
-//     console.log(`Secure server is listening on ${port}`);
+https.createServer(httpsOptions, app).listen(port, (err) => {
+    if (err) throw err;
+    console.log(`Secure server is listening on ${port}`);
     
-//     // Ajuste: abrir a URL correta no navegador com https://localhost
-//     open(`https://localhost:${port}`); // Corrigido de http:// para https://
-// });
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`The server is now running on port ${PORT}`);
-    open(`http://localhost:${PORT}`);
+    // Ajuste: abrir a URL correta no navegador com https://localhost
+    open(`https://localhost:${port}`); // Corrigido de http:// para https://
 });
+
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => {
+//     console.log(`The server is now running on port ${PORT}`);
+//     open(`http://localhost:${PORT}`);
+// });

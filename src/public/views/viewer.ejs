@@ -21,18 +21,18 @@
                 const streamAccountId = '<%= streamAccountId %>'
                 console.log(streamAccountId)
 
-                const tokenGenerator = async () => {
-                    return {
-                      streamName: streamName,
-                      streamAccountId: streamAccountId
-                    };
-                };
+               // Callback to generate a subscriber token with credentials
+const tokenGenerator = () => millicast.Director.getSubscriber({
+      streamName: streamName,
+      streamAccountId: streamAccountId
+});
 
                 const millicastView = new millicast.View(streamName, tokenGenerator);
-
                 millicastView.on('track', (event) => {
-                    console.log('Stream recebido.');
-                    video.srcObject = event.streams[0];
+                  console.log('Stream has started.', event);
+                  video.srcObject = event.streams[0];
+                  video.hidden = false;
+                  video.autoplay = true;
                 });
 
                 await millicastView.connect();

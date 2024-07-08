@@ -33,8 +33,6 @@
                 console.log(response.data.id);
                 console.log(response.data.label);
                 console.log(response.data.token);
-                 // Armazena os dados no localStorage
-                 localStorage.setItem('publisherData', JSON.stringify(response.data));
 
                 // Set the credentials for the streaming
                 const yourPublishingToken = response.data.token; // Token de publicação

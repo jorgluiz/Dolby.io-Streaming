@@ -109,7 +109,8 @@ app.get('/publisher', (req, res) => {
 app.get('/viewer', (req, res) => {
     res.render('viewer', {
         streamAccountId: publisherData.data.id,
-        streamName: publisherData.data.name
+        streamName: publisherData.data.label,
+        streamToken: publisherData.data.token
     });
 });
 

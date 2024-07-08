@@ -12,6 +12,8 @@
     <input type="text" id="streamName" value="test">
     <label for="streamAccountId">Stream Account ID:</label>
     <input type="text" id="streamAccountId" value="">
+    <label for="streamToken">Token</label>
+    <input type="text" id="streamToken" value="">
     <button id="start" onclick="startLive()">Start Live</button>
     <script>
         const video = document.getElementById('my-video');
@@ -20,8 +22,10 @@
             // Obtendo os valores dos inputs
             const streamNameInput = document.getElementById('streamName');
             const streamAccountIdInput = document.getElementById('streamAccountId');
+            const streamTokenInput = document.getElementById('streamToken');
             const streamName = streamNameInput.value;
             const streamAccountId = streamAccountIdInput.value;
+            const streamToken = streamTokenInput.value;
 
             console.log('Stream Name:', streamName);
             console.log('Stream Account ID:', streamAccountId);
@@ -30,7 +34,8 @@
                 // Callback para gerar um token de assinante com as credenciais
                 const tokenGenerator = () => millicast.Director.getSubscriber({
                     streamName: streamName,
-                    streamAccountId: streamAccountId
+                    streamAccountId: streamAccountId,
+                    subscriberToken: streamToken
                 });
 
                 const millicastView = new millicast.View(streamName, tokenGenerator);

@@ -10,16 +10,16 @@
     <script>
         const video = document.getElementById('my-video');
 
+        const streamName = '<%= streamName %>'
+                console.log(streamName)
+                const streamAccountId = '<%= streamAccountId %>'
+                console.log(streamAccountId)
+
         const startViewing = async () => {
             try {
                 // // Obtém os dados do localStorage
                 // const publisherData = JSON.parse(localStorage.getItem('publisherData'));
                 // if (!publisherData) throw new Error('Dados do publisher não encontrados');
-
-                const streamName = '<%= streamName %>'
-                console.log(streamName)
-                const streamAccountId = '<%= streamAccountId %>'
-                console.log(streamAccountId)
 
                // Callback to generate a subscriber token with credentials
 const tokenGenerator = () => millicast.Director.getSubscriber({

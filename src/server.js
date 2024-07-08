@@ -99,12 +99,12 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-const yourPublishingToken = process.env.yourPublishingToken
-const yourStreamName = process.env.yourStreamName
+// const yourPublishingToken = process.env.yourPublishingToken
+// const yourStreamName = process.env.yourStreamName
 
-app.get('/publisher', (req, res) => {
-    res.render('publisher', {yourPublishingToken, yourStreamName});
-});
+// app.get('/publisher', (req, res) => {
+//     res.render('publisher', {yourPublishingToken, yourStreamName});
+// });
 
 app.get('/viewer', (req, res) => {
     res.render('viewer', {

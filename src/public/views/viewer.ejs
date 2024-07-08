@@ -8,32 +8,32 @@
     <video id="my-video" controls autoplay muted></video>
 
     <script>
-        // Get media element
         const video = document.getElementById('my-video');
 
-        // Set the credentials for the streaming
-        const yourStreamName = "test"; // Use o mesmo nome de stream que você usou no publisher
-        const yourStreamAccountId = "9004024"; // Substitua pelo seu ID de conta
-
-        // Define callback para gerar novos tokens
-        const tokenGenerator = () => millicast.Director.getSubscriber({
-            streamName: yourStreamName,
-            streamAccountId: yourStreamAccountId,
-            subscriberToken: 'd5b448078a180869472fdb65d5b38005545aa8602800b3918252043de0ec1e55',
-        });
-
-        // Cria uma nova instância de visualização
-        const millicastView = new millicast.View(yourStreamName, tokenGenerator);
-
-        // Evento de quando o stream é recebido
-        millicastView.on('track', (event) => {
-            console.log('Stream recebido.');
-            video.srcObject = event.streams[0];
-        });
-
-        // Função assíncrona para conectar ao stream
         const startViewing = async () => {
             try {
+                // Obtém os dados do localStorage
+                const publisherData = JSON.parse(localStorage.getItem('publisherData'));
+                if (!publisherData) throw new Error('Dados do publisher não encontrados');
+
+                const { label: yourStreamName, token: yourPublishingToken } = publisherData;
+                console.log(yourStreamName)
+                console.log(yourPublishingToken)
+
+                const tokenGenerator = async () => {
+                    return {
+                        token: yourPublishingToken,
+                        streamName: yourStreamName
+                    };
+                };
+
+                const millicastView = new millicast.View(yourStreamName, tokenGenerator);
+
+                millicastView.on('track', (event) => {
+                    console.log('Stream recebido.');
+                    video.srcObject = event.streams[0];
+                });
+
                 await millicastView.connect();
                 console.log('Conectado ao stream com sucesso');
             } catch (error) {

@@ -9,6 +9,8 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
+let publisherData = {};  // Adiciona uma variável global para armazenar dados do publisher
+
 const apiKey = process.env.API_KEY;
 const port = '8084';
 const url = new URL('https://api.millicast.com/api/publish_token/');
@@ -26,6 +28,10 @@ const defaultOptions = {
 };
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
+// const httpsOptions = {
+//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+// };
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -75,7 +81,9 @@ app.post('/millicast/:endpoint', (req, res) => {
         case 'createToken':
             createToken(req.body)
                 .then((data) => {
-                    res.json(JSON.parse(data)); // Enviar a resposta como JSON
+                    const parsedData = JSON.parse(data);
+                    publisherData = parsedData;  // Armazena os dados do publisher
+                    res.json(parsedData);  // Envia a resposta como JSON
                 })
                 .catch((err) => {
                     res.status(500).json({ status: 'fail', data: err });
@@ -99,7 +107,10 @@ app.get('/publisher', (req, res) => {
 });
 
 app.get('/viewer', (req, res) => {
-    res.render('viewer', {yourPublishingToken, yourStreamName});
+    res.render('viewer', {
+        streamAccountId: publisherData.data.id,
+        streamName: publisherData.data.name
+    });
 });
 
 // Https server for serving our html files. (WebRTC requires https)

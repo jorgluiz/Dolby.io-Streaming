@@ -16,7 +16,7 @@
     const tokenGenerator = async () => {
       try {
         const response = await millicast.Director.getPublisher({
-          token: yourPublishingToken,
+          streamAccountId: yourPublishingToken,
           streamName: yourStreamName
         });
         return response;

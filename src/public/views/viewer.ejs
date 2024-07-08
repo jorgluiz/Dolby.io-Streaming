@@ -12,22 +12,23 @@
 
         const startViewing = async () => {
             try {
-                // Obtém os dados do localStorage
-                const publisherData = JSON.parse(localStorage.getItem('publisherData'));
-                if (!publisherData) throw new Error('Dados do publisher não encontrados');
+                // // Obtém os dados do localStorage
+                // const publisherData = JSON.parse(localStorage.getItem('publisherData'));
+                // if (!publisherData) throw new Error('Dados do publisher não encontrados');
 
-                const { label: yourStreamName, token: yourPublishingToken } = publisherData;
-                console.log(yourStreamName)
-                console.log(yourPublishingToken)
+                const streamName = '<%= streamName %>'
+                console.log(streamName)
+                const streamAccountId = '<%= streamAccountId %>'
+                console.log(streamAccountId)
 
                 const tokenGenerator = async () => {
                     return {
-                        token: yourPublishingToken,
-                        streamName: yourStreamName
+                      streamName: streamName,
+                      streamAccountId: streamAccountId
                     };
                 };
 
-                const millicastView = new millicast.View(yourStreamName, tokenGenerator);
+                const millicastView = new millicast.View(streamName, tokenGenerator);
 
                 millicastView.on('track', (event) => {
                     console.log('Stream recebido.');

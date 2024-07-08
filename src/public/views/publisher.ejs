@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Millicast Publisher</title>
+  <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk@latest/dist/millicast.umd.js"></script>
+</head>
+<body>
+  <h1>Millicast Publisher</h1>
+  <script type="module">
+    const yourPublishingToken = "<%= yourPublishingToken %>"; // Substitua pelo seu token de publicação
+    const yourStreamName = "<%= yourStreamName %>"; // Substitua pelo nome do seu stream
+
+    // Define callback para gerar novos tokens
+    const tokenGenerator = async () => {
+      try {
+        const response = await millicast.Director.getPublisher({
+          token: yourPublishingToken,
+          streamName: yourStreamName
+        });
+        return response;
+      } catch (error) {
+        console.error('Erro ao gerar o token de publicação:', error);
+      }
+    };
+
+    // Função assíncrona para publicar o stream
+    const startPublishing = async () => {
+      try {
+        // Obtém a câmera e o microfone do usuário
+        const mediaStream = await navigator.mediaDevices.getUserMedia({video: true });
+
+        // Cria uma nova instância de publicação
+        const millicastPublish = new millicast.Publish(yourStreamName, tokenGenerator);
+
+        // Opções de transmissão
+        const broadcastOptions = {
+          mediaStream
+        };
+
+        // Inicia a transmissão
+        await millicastPublish.connect(broadcastOptions);
+        console.log('Transmissão iniciada com sucesso');
+      } catch (error) {
+        console.error('Erro ao iniciar a transmissão:', error);
+      }
+    };
+
+    // Inicia a publicação ao carregar a página
+    startPublishing();
+  </script>
+</body>
+</html>
+

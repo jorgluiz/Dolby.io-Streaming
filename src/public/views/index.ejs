@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Dolby.io Real-time Streaming Token API Tutorial</title>
+    <title>Dolby.io Real-time Streaming Token API Tutorial - Publisher</title>
+    <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk@latest/dist/millicast.umd.js"></script>
 </head>
-
 <body>
     <label for="streamName">Stream Name</label>
     <input id="streamName" type="text" value="test" />
     <button onclick="createToken()">Create Token</button>
     <script>
+        const servicePath = "/millicast";
+
         async function createToken() {
             const name = document.getElementById("streamName").value;
             console.log("createToken", name);
@@ -20,62 +21,65 @@
                 streams: [{ streamName: name }],
             };
 
-            const fetchResponse = await fetch("/millicast/createToken", {
-                method: "POST",
-                body: JSON.stringify(data),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const response = await fetchResponse.json();
-            console.log(response);
+            try {
+                const fetchResponse = await fetch(servicePath + "/createToken", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const response = await fetchResponse.json();
+                console.log(response.data.id);
+                console.log(response.data.label);
+                console.log(response.data.token);
+
+                // Set the credentials for the streaming
+                const yourPublishingToken = response.data.token; // Token de publicação
+                const yourStreamName = response.data.label; // Nome do stream
+
+                // Função assíncrona para publicar o stream
+                const startPublishing = async () => {
+                    try {
+                        // Define callback para gerar novos tokens
+                        const tokenGenerator = () => {
+                            return millicast.Director.getPublisher({
+                                token: yourPublishingToken,
+                                streamName: yourStreamName
+                            });
+                        };
+
+                        // Cria uma nova instância de publicação
+                        const millicastPublish = new millicast.Publish(yourStreamName, tokenGenerator);
+
+                        // Obtém a câmera e o microfone do usuário
+                        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+                        // Anexa a mídia ao elemento de vídeo local (para visualização do publisher)
+                        const localVideo = document.createElement('video');
+                        localVideo.srcObject = mediaStream;
+                        localVideo.autoplay = true;
+                        localVideo.muted = true; // Muted para evitar eco
+                        document.body.appendChild(localVideo);
+
+                        // Opções de transmissão
+                        const broadcastOptions = {
+                            mediaStream
+                        };
+
+                        // Inicia a transmissão
+                        await millicastPublish.connect(broadcastOptions);
+                        console.log('Transmissão iniciada com sucesso');
+                    } catch (error) {
+                        console.error('Erro ao iniciar a transmissão:', error);
+                    }
+                };
+                startPublishing();
+
+            } catch (error) {
+                console.error('Erro ao criar o token:', error);
+            }
         }
     </script>
 </body>
-
 </html>
-
-<!-- <!DOCTYPE html>
-<html>
-
-<head>
-    <title>Video Chat</title>
-    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
-</head>
-
-<body>
-    <div id="publisher"></div>
-    <div id="subscriber"></div>
-
-    <script>
-        const apiKey = data.apiKey;
-        const sessionId = data.sessionId;
-        const token = data.token;
-
-        const session = OT.initSession(apiKey, sessionId);
-
-        session.on('streamCreated', event => {
-            session.subscribe(event.stream, 'subscriber', {
-                insertMode: 'append',
-                width: '100%',
-                height: '100%'
-            });
-        });
-
-        const publisher = OT.initPublisher('publisher', {
-            insertMode: 'append',
-            width: '100%',
-            height: '100%'
-        });
-
-        session.connect(token, err => {
-            if (err) {
-                console.error('Failed to connect', err);
-            } else {
-                session.publish(publisher);
-            }
-        });
-    </script>
-</body>
-
-</html> -->

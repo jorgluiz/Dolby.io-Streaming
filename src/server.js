@@ -107,10 +107,16 @@ app.get('/viewer', (req, res) => {
 });
 
 // Https server for serving our html files. (WebRTC requires https)
-https.createServer(httpsOptions, app).listen(port, (err) => {
-    if (err) throw err;
-    console.log(`Secure server is listening on ${port}`);
+// https.createServer(httpsOptions, app).listen(port, (err) => {
+//     if (err) throw err;
+//     console.log(`Secure server is listening on ${port}`);
     
-    // Ajuste: abrir a URL correta no navegador com https://localhost
-    open(`https://localhost:${port}`); // Corrigido de http:// para https://
+//     // Ajuste: abrir a URL correta no navegador com https://localhost
+//     open(`https://localhost:${port}`); // Corrigido de http:// para https://
+// });
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`The server is now running on port ${PORT}`);
+    open(`http://localhost:${PORT}`);
 });

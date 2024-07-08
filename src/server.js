@@ -5,36 +5,9 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 const path = require("path");
 const open = require("open");
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const session = require('express-session');
-const RedisStore = require('connect-redis').default;
-const Redis = require('redis');
+const {salvarDadosNoDatabase, obterDados} = require("./configFirebase")
 
 const app = express();
-
-// Configuração do Redis
-const redisClient = Redis.createClient({
-    url: process.env.REDIS_URL
-});
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
-
-// Conectar o cliente Redis
-async function connectRedis() {
-    await redisClient.connect();
-}
-connectRedis().catch(console.error);
-
-app.use(session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
-
-
-
-let publisherData = {};  // Adiciona uma variável global para armazenar dados do publisher
 
 const apiKey = process.env.API_KEY;
 const port = '8084';
@@ -107,8 +80,7 @@ app.post('/millicast/:endpoint', (req, res) => {
             createToken(req.body)
                 .then((data) => {
                     const parsedData = JSON.parse(data);
-                    // Armazena os dados do publisher na sessão
-                    req.session.publisherData = parsedData;
+                    salvarDadosNoDatabase(parsedData)
                     res.json(parsedData);  // Envia a resposta como JSON
                 })
                 .catch((err) => {
@@ -132,16 +104,12 @@ app.get('/', (req, res) => {
 //     res.render('publisher', {yourPublishingToken, yourStreamName});
 // });
 
-app.get('/viewer', (req, res) => {
-   // Recupera os dados do publisher da sessão
-   const { publisherData } = req.session;
-   if (!publisherData) {
-       return res.status(400).send('Dados do publisher não encontrados');
-   }
+app.get('/viewer', async (req, res) => {
+   const dados = await obterDados()
+
    res.render('viewer', {
-       streamAccountId: publisherData.data.id,
-       streamName: publisherData.data.label,
-       streamToken: publisherData.data.token
+    streamName: dados.data.name,
+    streamAccountId: dados.data.id
    });
 });
 

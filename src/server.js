@@ -18,8 +18,12 @@ const redisClient = Redis.createClient({
 });
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
+// Conectar o cliente Redis
+async function connectRedis() {
+    await redisClient.connect();
+}
+connectRedis().catch(console.error);
 
-// Configuração de sessão
 app.use(session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -27,6 +31,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
+
 
 
 let publisherData = {};  // Adiciona uma variável global para armazenar dados do publisher

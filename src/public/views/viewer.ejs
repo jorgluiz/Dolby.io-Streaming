@@ -1,38 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolby.io Real-time Streaming Token API Tutorial - Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk@latest/dist/millicast.umd.js"></script>
 </head>
 <body>
     <video id="my-video" controls autoplay muted></video>
-
+    <label for="streamName">Stream Name:</label>
+    <input type="text" id="streamName" value="123">
+    <label for="streamAccountId">Stream Account ID:</label>
+    <input type="text" id="streamAccountId" value="123">
+    <button id="start" onclick="startLive()">Start Live</button>
     <script>
         const video = document.getElementById('my-video');
 
-        const streamName = '<%= streamName %>'
-                console.log(streamName)
-                const streamAccountId = '<%= streamAccountId %>'
-                console.log(streamAccountId)
+        const startLive = async () => {
+            // Obtendo os valores dos inputs
+            const streamNameInput = document.getElementById('streamName');
+            const streamAccountIdInput = document.getElementById('streamAccountId');
+            const streamName = streamNameInput.value;
+            const streamAccountId = streamAccountIdInput.value;
 
-        const startViewing = async () => {
+            console.log('Stream Name:', streamName);
+            console.log('Stream Account ID:', streamAccountId);
+
             try {
-                // // Obtém os dados do localStorage
-                // const publisherData = JSON.parse(localStorage.getItem('publisherData'));
-                // if (!publisherData) throw new Error('Dados do publisher não encontrados');
-
-               // Callback to generate a subscriber token with credentials
-const tokenGenerator = () => millicast.Director.getSubscriber({
-      streamName: streamName,
-      streamAccountId: streamAccountId
-});
+                // Callback para gerar um token de assinante com as credenciais
+                const tokenGenerator = () => millicast.Director.getSubscriber({
+                    streamName: streamName,
+                    streamAccountId: streamAccountId
+                });
 
                 const millicastView = new millicast.View(streamName, tokenGenerator);
                 millicastView.on('track', (event) => {
-                  console.log('Stream has started.', event);
-                  video.srcObject = event.streams[0];
-                  video.hidden = false;
-                  video.autoplay = true;
+                    console.log('Stream has started.', event);
+                    video.srcObject = event.streams[0];
+                    video.hidden = false;
+                    video.autoplay = true;
                 });
 
                 await millicastView.connect();
@@ -42,7 +48,8 @@ const tokenGenerator = () => millicast.Director.getSubscriber({
             }
         };
 
-        startViewing();
+        // Adicionando um Event Listener para o botão em vez de usar `onclick` no HTML
+        document.getElementById('start').addEventListener('click', startLive);
     </script>
 </body>
 </html>

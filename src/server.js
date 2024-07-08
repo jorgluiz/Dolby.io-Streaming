@@ -26,10 +26,10 @@ const defaultOptions = {
 };
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+const httpsOptions = {
+    key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+};
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -106,11 +106,9 @@ app.get('/', (req, res) => {
 
 app.get('/viewer', async (req, res) => {
    const dados = await obterDados()
-
-   res.render('viewer', {
-    streamName: dados.data.name,
-    streamAccountId: dados.data.id
-   });
+// console.log(dados.data.name)
+// console.log(dados.data.id)
+   res.render('viewer');
 });
 
 // Https server for serving our html files. (WebRTC requires https)

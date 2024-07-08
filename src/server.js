@@ -6,8 +6,18 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const open = require("open");
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const session = require('express-session');
+
 
 const app = express();
+
+// Configuração de sessão
+app.use(session({
+    secret: 'your-secret-key',  // Altere para uma chave secreta mais segura em produção
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }  // Defina como true se estiver usando HTTPS
+}));
 
 let publisherData = {};  // Adiciona uma variável global para armazenar dados do publisher
 
@@ -82,7 +92,8 @@ app.post('/millicast/:endpoint', (req, res) => {
             createToken(req.body)
                 .then((data) => {
                     const parsedData = JSON.parse(data);
-                    publisherData = parsedData;  // Armazena os dados do publisher
+                    // Armazena os dados do publisher na sessão
+                    req.session.publisherData = parsedData;
                     res.json(parsedData);  // Envia a resposta como JSON
                 })
                 .catch((err) => {
@@ -107,11 +118,16 @@ app.get('/', (req, res) => {
 // });
 
 app.get('/viewer', (req, res) => {
-    res.render('viewer', {
-        streamAccountId: publisherData.data.id,
-        streamName: publisherData.data.label,
-        streamToken: publisherData.data.token
-    });
+   // Recupera os dados do publisher da sessão
+   const { publisherData } = req.session;
+   if (!publisherData) {
+       return res.status(400).send('Dados do publisher não encontrados');
+   }
+   res.render('viewer', {
+       streamAccountId: publisherData.data.id,
+       streamName: publisherData.data.label,
+       streamToken: publisherData.data.token
+   });
 });
 
 // Https server for serving our html files. (WebRTC requires https)

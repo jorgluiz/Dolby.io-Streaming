@@ -26,10 +26,6 @@ const defaultOptions = {
 };
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-const httpsOptions = {
-    key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-    cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-};
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

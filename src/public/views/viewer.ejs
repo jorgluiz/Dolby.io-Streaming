@@ -61,7 +61,7 @@
             <br />
             <button onclick="startViewing()">Start Viewing</button>
         </div>
-        <video id="video" width="600" height="400" autoplay playsinline></video>
+        <video id="video" width="600" height="400" controls></video>
     </div>
 
     <script>
@@ -75,28 +75,38 @@
                 return;
             }
 
-            // Função para obter o token de assinatura
-            const tokenGenerator = async () => {
-                // Substitua a URL pelo seu endpoint para gerar um token de assinatura
-                const response = await fetch(`/generateSubscriberToken?streamName=${encodeURIComponent(streamName)}&accountId=${encodeURIComponent(accountId)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ streamName, accountId })
-                });
+            // // Função para obter o token de assinatura
+            // const tokenGenerator = async () => {
+            //     // Substitua a URL pelo seu endpoint para gerar um token de assinatura
+            //     const response = await fetch(`/generateSubscriberToken?streamName=${encodeURIComponent(streamName)}&accountId=${encodeURIComponent(accountId)}`, {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         },
+            //         body: JSON.stringify({ streamName, accountId })
+            //     });
+            //     if (!response.ok) {
+            //         throw new Error(`HTTP error! Status: ${response.status}`);
+            //     }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+            //     const data = await response.json();
+            //     console.log(data, "chegou aqui? data")
+            //     if (!data.token) {
+            //         throw new Error('Invalid token response');
+            //     }
 
-                const data = await response.json();
-                if (!data.token) {
-                    throw new Error('Invalid token response');
-                }
+            //     return { token: data.token };
+            // };
 
-                return { token: data.token };
-            };
+            // Step 2.1c: Set your account id and stream name while Getting Started
+const yourStreamAccountId = streamName;
+const yourStreamName = accountId;
+
+// Callback to generate a subscriber token with credentials
+const tokenGenerator = () => millicast.Director.getSubscriber({
+      streamName: 'test',
+      streamAccountId: 'p9TPVt'
+});
 
             // Cria uma nova instância do Millicast View
             const millicastView = new window.millicast.View(streamName, tokenGenerator);
@@ -105,16 +115,21 @@
             millicastView.on('track', (event) => {
                 const video = document.getElementById('video');
                 video.srcObject = event.streams[0];
+                console.log('Stream has started.');
+                videoNode.hidden = false;
+                videoNode.autoplay = true;
             });
 
             try {
-                await millicastView.connect();
-                alert('Conexão iniciada!');
-            } catch (error) {
-                console.error('Falha na conexão', error);
-                alert('Connection failed: ' + error.message);
-                await millicastView.reconnect();
-            }
+    await millicastView.connect();
+} catch (e) {
+    if (!millicastView.isActive()) {
+        console.log('Stream is not live, the broadcast will begin soon.');
+    }
+
+    console.log('Connection failed:', e);
+    millicastView.reconnect();
+}
         }
     </script>
 </body>

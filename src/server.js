@@ -53,12 +53,13 @@ app.post('/generateSubscriberToken', async (req, res) => {
     }
 
     try {
-        const response = await axios.post(`https://api.millicast.com/api/v2/streams/${streamName}/generateSubscriberToken`, {}, {
+        const response = await axios.post(`https://api.millicast.com/api/v2/streams/${accountId}/generateSubscriberToken`, {}, {
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             }
         });
+        console.log(response, "server")
 
         const token = response.data.token;
 

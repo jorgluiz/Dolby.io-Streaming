@@ -1,55 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Millicast Publisher</title>
-  <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk@latest/dist/millicast.umd.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicador Millicast</title>
+    <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk/dist/millicast.umd.min.js"></script>
 </head>
 <body>
-  <h1>Millicast Publisher</h1>
-  <script type="module">
-    const yourPublishingToken = "<%= yourPublishingToken %>"; // Substitua pelo seu token de publicação
-    const yourStreamName = "<%= yourStreamName %>"; // Substitua pelo nome do seu stream
+    <h1>Publicador Millicast</h1>
+    <label for="streamName">Nome do Stream</label>
+    <input id="streamName" type="text" value="test" />
+    <button onclick="startPublishing()">Iniciar Publicação</button>
 
-    // Define callback para gerar novos tokens
-    const tokenGenerator = async () => {
-      try {
-        const response = await millicast.Director.getPublisher({
-          streamAccountId: yourPublishingToken,
-          streamName: yourStreamName
-        });
-        return response;
-      } catch (error) {
-        console.error('Erro ao gerar o token de publicação:', error);
-      }
-    };
+    <script>
+        const servicePath = "/createToken";
 
-    // Função assíncrona para publicar o stream
-    const startPublishing = async () => {
-      try {
-        // Obtém a câmera e o microfone do usuário
-        const mediaStream = await navigator.mediaDevices.getUserMedia({video: true });
+        async function startPublishing() {
+            const streamName = document.getElementById("streamName").value;
 
-        // Cria uma nova instância de publicação
-        const millicastPublish = new millicast.Publish(yourStreamName, tokenGenerator);
+            if (!streamName) {
+                alert("Por favor, insira um nome para o stream");
+                return;
+            }
 
-        // Opções de transmissão
-        const broadcastOptions = {
-          mediaStream
-        };
+            const response = await fetch(servicePath, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ streamName })
+            });
 
-        // Inicia a transmissão
-        await millicastPublish.connect(broadcastOptions);
-        console.log('Transmissão iniciada com sucesso');
-      } catch (error) {
-        console.error('Erro ao iniciar a transmissão:', error);
-      }
-    };
+            const data = await response.json();
 
-    // Inicia a publicação ao carregar a página
-    startPublishing();
-  </script>
+            const token = data.token;
+            const streamId = data.streamId;
+
+            const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+
+            const tokenGenerator = () => Promise.resolve({ token });
+
+            const publisher = new window.millicast.Publish(streamName, tokenGenerator);
+
+            const broadcastOptions = {
+                mediaStream: mediaStream
+            };
+
+            try {
+                await publisher.connect(broadcastOptions);
+                alert('Transmissão iniciada!');
+            } catch (error) {
+                console.error('Falha na conexão', error);
+            }
+        }
+    </script>
 </body>
 </html>
-

@@ -3,11 +3,15 @@
     "s": "nodemon src/server.js"
   },
   "dependencies": {
+    "@millicast/sdk": "^0.1.46",
+    "axios": "^1.7.2",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "firebase-admin": "^12.2.0",
+    "node-fetch": "^3.3.2",
     "open": "8.4.0",
     "path": "^0.12.7"
   },

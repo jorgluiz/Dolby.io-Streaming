@@ -1,60 +1,122 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dolby.io Real-time Streaming Token API Tutorial - Viewer</title>
-    <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk@latest/dist/millicast.umd.js"></script>
+    <title>Visualizador Millicast</title>
+    <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk/dist/millicast.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        video {
+            border: 1px solid #ddd;
+            background-color: #000;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            margin-bottom: 10px;
+        }
+
+        input {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
-    <video id="my-video" controls autoplay muted></video>
-    <label for="streamName">Stream Name:</label>
-    <input type="text" id="streamName" value="test">
-    <label for="streamAccountId">Stream Account ID:</label>
-    <input type="text" id="streamAccountId" value="">
-    <label for="streamToken">Token</label>
-    <input type="text" id="streamToken" value="">
-    <button id="start" onclick="startLive()">Start Live</button>
+    <h1>Visualizador Millicast</h1>
+    <div class="container">
+        <div class="controls">
+            <label for="streamName">Stream Name:</label>
+            <input id="streamName" type="text" placeholder="Enter stream name" />
+            <br />
+            <label for="accountId">Account ID:</label>
+            <input id="accountId" type="text" placeholder="Enter account ID" />
+            <br />
+            <button onclick="startViewing()">Start Viewing</button>
+        </div>
+        <video id="video" width="600" height="400" autoplay playsinline></video>
+    </div>
+
     <script>
-        const video = document.getElementById('my-video');
+        async function startViewing() {
+            // Obtém os valores dos inputs
+            const streamName = document.getElementById('streamName').value;
+            const accountId = document.getElementById('accountId').value;
 
-        const startLive = async () => {
-            // Obtendo os valores dos inputs
-            const streamNameInput = document.getElementById('streamName');
-            const streamAccountIdInput = document.getElementById('streamAccountId');
-            const streamTokenInput = document.getElementById('streamToken');
-            const streamName = streamNameInput.value;
-            const streamAccountId = streamAccountIdInput.value;
-            const streamToken = streamTokenInput.value;
+            if (!streamName || !accountId) {
+                alert('Please enter both stream name and account ID');
+                return;
+            }
 
-            console.log('Stream Name:', streamName);
-            console.log('Stream Account ID:', streamAccountId);
+            // Função para obter o token de assinatura
+            const tokenGenerator = async () => {
+                // Substitua a URL pelo seu endpoint para gerar um token de assinatura
+                const response = await fetch(`/generateSubscriberToken?streamName=${encodeURIComponent(streamName)}&accountId=${encodeURIComponent(accountId)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ streamName, accountId })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!data.token) {
+                    throw new Error('Invalid token response');
+                }
+
+                return { token: data.token };
+            };
+
+            // Cria uma nova instância do Millicast View
+            const millicastView = new window.millicast.View(streamName, tokenGenerator);
+
+            // Adiciona um ouvinte para quando um novo track chegar
+            millicastView.on('track', (event) => {
+                const video = document.getElementById('video');
+                video.srcObject = event.streams[0];
+            });
 
             try {
-                // Callback para gerar um token de assinante com as credenciais
-                const tokenGenerator = () => millicast.Director.getSubscriber({
-                    streamName: streamName,
-                    streamAccountId: streamAccountId,
-                    subscriberToken: streamToken
-                });
-
-                const millicastView = new millicast.View(streamName, tokenGenerator);
-                millicastView.on('track', (event) => {
-                    console.log('Stream has started.', event);
-                    video.srcObject = event.streams[0];
-                    video.hidden = false;
-                    video.autoplay = true;
-                });
-
                 await millicastView.connect();
-                console.log('Conectado ao stream com sucesso');
+                alert('Conexão iniciada!');
             } catch (error) {
-                console.error('Erro ao conectar ao stream:', error);
+                console.error('Falha na conexão', error);
+                alert('Connection failed: ' + error.message);
+                await millicastView.reconnect();
             }
-        };
-
-        // Adicionando um Event Listener para o botão em vez de usar `onclick` no HTML
-        document.getElementById('start').addEventListener('click', startLive);
+        }
     </script>
 </body>
+
 </html>

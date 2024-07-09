@@ -6,11 +6,31 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const open = require("open");
 const {salvarDadosNoDatabase, obterDados} = require("./configFirebase")
+const axios = require('axios');
+const cors = require('cors');
+
 
 const app = express();
 
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "public/views"));
+
+// Serve static files from the public folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(bodyParser.json());
+app.use(cors()); // Habilita CORS para o frontend
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
+// const httpsOptions = {
+//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+// };
+
+
 const apiKey = process.env.API_KEY;
-const port = '8084';
+// const PORT = '8084';
 const url = new URL('https://api.millicast.com/api/publish_token/');
 
 // Ajuste: use 'url.pathname' ao invés de 'url.path'
@@ -25,20 +45,28 @@ const defaultOptions = {
     },
 };
 
-// Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+app.post('/generateSubscriberToken', async (req, res) => {
+    const { streamName, accountId } = req.body;
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+    if (!streamName || !accountId) {
+        return res.status(400).json({ error: 'Missing streamName or accountId' });
+    }
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "public/views"));
+    try {
+        const response = await axios.post(`https://api.millicast.com/api/v2/streams/${streamName}/generateSubscriberToken`, {}, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-// Serve static files from the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+        const token = response.data.token;
+
+        res.json({ token });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 function createToken(data) {
     return new Promise((resolve, reject) => {
@@ -63,7 +91,7 @@ function createToken(data) {
             resp.on('error', (err) => {
                 reject(err);
             });
-        });
+        }); 
 
         req.write(JSON.stringify(data));
         req.end();
@@ -73,15 +101,12 @@ function createToken(data) {
 // Listen to client requests
 app.post('/millicast/:endpoint', (req, res) => {
     const params = req.params;
-    console.log(params);
 
     switch (params.endpoint) {
         case 'createToken':
             createToken(req.body)
                 .then((data) => {
-                    // const parsedData = JSON.parse(data);
-                    // salvarDadosNoDatabase(parsedData)
-                    res.json(JSON.parse(data));  // Envia a resposta como JSON
+                    res.json(JSON.parse(data));
                 })
                 .catch((err) => {
                     res.status(500).json({ status: 'fail', data: err });
@@ -112,12 +137,12 @@ app.get('/viewer', async (req, res) => {
 });
 
 // Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(port, (err) => {
+// https.createServer(httpsOptions, app).listen(PORT, (err) => {
 //     if (err) throw err;
-//     console.log(`Secure server is listening on ${port}`);
+//     console.log(`Secure server is listening on ${PORT}`);
     
 //     // Ajuste: abrir a URL correta no navegador com https://localhost
-//     open(`https://localhost:${port}`); // Corrigido de http:// para https://
+//     open(`https://localhost:${PORT}`); // Corrigido de http:// para https://
 // });
 
 const PORT = process.env.PORT || 8080;

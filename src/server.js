@@ -22,12 +22,6 @@ app.use(bodyParser.json());
 app.use(cors()); // Habilita CORS para o frontend
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
-
 
 const apiKey = process.env.API_KEY;
 // const PORT = '8084';
@@ -131,21 +125,12 @@ app.get('/', (req, res) => {
 // });
 
 app.get('/viewer', async (req, res) => {
-   const dados = await obterDados()
+//    const dados = await obterDados()
 // console.log(dados.data.name)
 // console.log(dados.data.id)
    res.render('viewer');
 });
 
-
-// Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(PORT, (err) => {
-//     if (err) throw err;
-//     console.log(`Secure server is listening on ${PORT}`);
-    
-//     // Ajuste: abrir a URL correta no navegador com https://localhost
-//     open(`https://localhost:${PORT}`); // Corrigido de http:// para https://
-// });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

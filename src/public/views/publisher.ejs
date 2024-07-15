@@ -38,7 +38,7 @@
 
             const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
 
-            const tokenGenerator = () => Promise.resolve({ token });
+            const tokenGenerator = () => Promise.resolve({ token });]
 
             const publisher = new window.millicast.Publish(streamName, tokenGenerator);
 

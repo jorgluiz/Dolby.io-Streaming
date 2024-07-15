@@ -1,6 +1,7 @@
 // Importar o Firebase Admin SDK
-var admin = require("firebase-admin");
-require('dotenv').config();
+import admin from "firebase-admin"
+import dotenv from 'dotenv'
+dotenv.config();
 
 var serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
@@ -44,7 +45,9 @@ function obterDados() {
   })
 }
 
-module.exports = {
-  salvarDadosNoDatabase,
-  obterDados
-};
+// module.exports = {
+//   salvarDadosNoDatabase,
+//   obterDados
+// };
+
+export default {salvarDadosNoDatabase, obterDados}

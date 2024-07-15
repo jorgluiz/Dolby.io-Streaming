@@ -1,16 +1,24 @@
-require('dotenv').config();
-const https = require("https");
-const express = require("express");
-const fs = require("fs");
-const bodyParser = require("body-parser");
-const path = require("path");
-const open = require("open");
-const {salvarDadosNoDatabase, obterDados} = require("./configFirebase")
-const axios = require('axios');
-const cors = require('cors');
+import dotenv from 'dotenv';
+// Carregar variáveis de ambiente
+dotenv.config();
+import https  from "https"
+import express  from "express"
+import fs  from "fs"
+import bodyParser  from "body-parser"
+import path  from "path"
+import open  from "open"
+// import {salvarDadosNoDatabase, obterDados} from "./configFirebase"
+import axios from 'axios'
+import cors from 'cors'
+import { fileURLToPath } from 'url';
+import { GraphQLClient, gql } from 'graphql-request'
 
 
 const app = express();
+
+// Defina __filename e __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public/views"));
@@ -23,14 +31,14 @@ app.use(cors()); // Habilita CORS para o frontend
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//     key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+const httpsOptions = {
+    key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+};
 
 
 const apiKey = process.env.API_KEY;
-// const PORT = '8084';
+const PORT = '8084';
 const url = new URL('https://api.millicast.com/api/publish_token/');
 
 // Ajuste: use 'url.pathname' ao invés de 'url.path'
@@ -137,17 +145,122 @@ app.get('/viewer', async (req, res) => {
    res.render('viewer');
 });
 
-// Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(PORT, (err) => {
-//     if (err) throw err;
-//     console.log(`Secure server is listening on ${PORT}`);
-    
-//     // Ajuste: abrir a URL correta no navegador com https://localhost
-//     open(`https://localhost:${PORT}`); // Corrigido de http:// para https://
-// });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`The server is now running on port ${PORT}`);
-    open(`http://localhost:${PORT}`);
+app.get('/get', async () => {
+
+        const publishingToken = 'SEU_PUBLISHING_TOKEN';
+
+        try {
+            const response = await fetch(`https://api.millicast.com/api/account`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const accountInfo = await response.json();
+   
+        } catch (error) {
+            console.error('Erro ao obter informações da conta:', error);
+        }
+})
+
+
+app.get('/getlist', async () => {
+// const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
+// const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
+// const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
+    // const urlconsult = 'https://api.millicast.com/api/account/details';
+    const urlconsult = 'https://api.millicast.com/graphql';
+    const data = {
+      streamName: "test",
+      streamAccountId: "9042964"
+    };
+    
+    const options = {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+    
+    fetch(urlconsult)
+      .then(response => response.json())
+      .then(data => {
+        console.log('Response:', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    
+})
+
+app.get('/getlist01', async (req, res) => {
+
+    const endpoint = 'https://api.millicast.com/graphql';
+
+    const graphQLClient = new GraphQLClient(endpoint, {
+        headers: {
+          authorization: `Bearer ${apiKey}`,
+        },
+      });
+      
+// Defina a consulta GraphQL
+const query = gql`
+  query FeedFindMany($skip: Int, $limit: Int) {
+    feedFindMany(skip: $skip, limit: $limit) {
+    accountId
+    started
+    active
+    ended
+    name
+    streamId
+    }
+  }
+`;
+
+
+
+
+// Defina as variáveis para a consulta
+const variables = {
+    skip: 0,
+    limit: 100
+};
+
+async function fetchFeed(res) {
+    try {
+        const response = await graphQLClient.request(query, variables);
+        console.log('Response:', response);
+        res.json(response);
+    } catch (error) {
+        console.error('GraphQL Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+fetchFeed(res);
+})
+
+// Https server for serving our html files. (WebRTC requires https)
+https.createServer(httpsOptions, app).listen(PORT, (err) => {
+    if (err) throw err;
+    console.log(`Secure server is listening on ${PORT}`);
+    
+    // Ajuste: abrir a URL correta no navegador com https://localhost
+    open(`https://localhost:${PORT}`); // Corrigido de http:// para https://
 });
+
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => {
+//     console.log(`The server is now running on port ${PORT}`);
+//     open(`http://localhost:${PORT}`);
+// });

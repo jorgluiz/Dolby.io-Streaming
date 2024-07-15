@@ -7,8 +7,17 @@
 <body>
     <label for="streamName">Stream Name</label>
     <input id="streamName" type="text" value="test" />
+    <button onclick="stopLive()">stop live</button>
     <button onclick="createToken()">Create Token</button>
     <script>
+        const stopLive = () => {
+            fetch('/getlist', {
+                method: "POST",
+                headers: {
+                        "Content-Type": "application/json",
+                    }
+            }).then(response => console.log(response)).catch(error => console.log(error))
+        }
         const servicePath = "/millicast";
 
         async function createToken() {

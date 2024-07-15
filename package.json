@@ -1,5 +1,5 @@
 {
-  "type": "module",
+  "type": "type",
   "scripts": {
     "s": "nodemon src/server.js"
   },

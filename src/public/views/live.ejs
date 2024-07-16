@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const streamName = "<%= streamName %>";
+            const streamNames = streamName.split(',');
+
+            const ul = document.querySelector("ul");
+
+            streamNames.forEach((name) => {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                a.rel = "stylesheet";
+                a.href = `https://dolby-io-streaming-bb0ed41bdad9.herokuapp.com/viewer/${name}`;
+                a.textContent = `https://dolby-io-streaming-bb0ed41bdad9.herokuapp.com/viewer/${name}`;
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        });
+    </script>
+</head>
+<body>
+    <ul>
+        <!-- Os links serão adicionados aqui pelo JavaScript -->
+    </ul>
+</body>
+</html>

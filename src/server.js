@@ -7,7 +7,7 @@ import fs  from "fs"
 import bodyParser  from "body-parser"
 import path  from "path"
 import open  from "open"
-// import {salvarDadosNoDatabase, obterDados} from "./configFirebase"
+import {salvarDadosNoDatabase, obterDados} from "./configFirebase.js"
 import axios from 'axios'
 import cors from 'cors'
 import { fileURLToPath } from 'url';
@@ -115,7 +115,9 @@ app.post('/millicast/:endpoint', (req, res) => {
         case 'createToken':
             createToken(req.body)
                 .then((data) => {
-                    res.json(JSON.parse(data));
+                    const reponse = JSON.parse(data)
+                    salvarDadosNoDatabase(reponse.data.name)
+                    res.json(reponse);
                 })
                 .catch((err) => {
                     res.status(500).json({ status: 'fail', data: err });
@@ -131,6 +133,12 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
+app.get('/links-live', async (req, res) => {
+    const streamName = await obterDados()
+    res.render('live', {streamName});
+})
+
+
 // const yourPublishingToken = process.env.yourPublishingToken
 // const yourStreamName = process.env.yourStreamName
 
@@ -138,11 +146,10 @@ app.get('/', (req, res) => {
 //     res.render('publisher', {yourPublishingToken, yourStreamName});
 // });
 
-app.get('/viewer', async (req, res) => {
-//    const dados = await obterDados()
-// console.log(dados.data.name)
-// console.log(dados.data.id)
-   res.render('viewer');
+app.get('/viewer/:streamName', async (req, res) => {
+    const streamName = req.params
+    const values = Object.values(streamName)
+   res.render('viewer', {values});
 });
 
 

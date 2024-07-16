@@ -9,6 +9,7 @@
     <input id="streamName" type="text" value="test" />
     <button onclick="stopLive()">stop live</button>
     <button onclick="createToken()">Create Token</button>
+    <a class="links-live" href="http://localhost:8080/links-live" target="_blank">links-live</a>
     <script>
         const stopLive = () => {
             fetch('/getlist', {
@@ -39,10 +40,10 @@
                     },
                 });
                 const response = await fetchResponse.json();
-                console.log(response.data.id);
-                console.log(response.data.label);
-                console.log(response.data.token);
-                console.log(response);
+                // console.log(response.data.id);
+                // console.log(response.data.label);
+                // console.log(response.data.token);
+                // console.log(response);
 
                 // Set the credentials for the streaming
                 const yourPublishingToken = response.data.token; // Token de publicação

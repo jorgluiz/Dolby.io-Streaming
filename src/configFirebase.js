@@ -12,13 +12,14 @@ admin.initializeApp({
 });
 
 // Função para salvar dados no Realtime Database
-function salvarDadosNoDatabase(dados) {
+export function salvarDadosNoDatabase(dados) {
+  console.log(dados, "salvar aqui")
   // Obter uma referência para o Realtime Database
   var database = admin.database();
 
   // Salvar os dados em uma referência específica
-  const ref = database.ref("restricted_access/secret_document");
-  ref.set(dados, (error) => {
+  const ref = database.ref(`restricted_access/secret_document`);
+  ref.push(dados, (error) => {
     if (error) {
       console.error('Erro ao salvar dados:', error);
     } else {
@@ -27,7 +28,7 @@ function salvarDadosNoDatabase(dados) {
   });
 }
 
-function obterDados() {
+export function obterDados() {
   return new Promise((resolve, reject) => {
     // Obter uma referência para o banco de dados
     var database = admin.database();
@@ -36,7 +37,8 @@ function obterDados() {
       try {
         const snapshot = await database.ref('/restricted_access/secret_document').once('value');
         const data = snapshot.val();
-        resolve(data)
+        const values = Object.values(data); // Extrair apenas os valores
+        resolve(values)
       } catch (error) {
         console.error('Erro ao obter dados:', error);
       }
@@ -50,4 +52,4 @@ function obterDados() {
 //   obterDados
 // };
 
-export default {salvarDadosNoDatabase, obterDados}
+// export default {salvarDadosNoDatabase, obterDados}

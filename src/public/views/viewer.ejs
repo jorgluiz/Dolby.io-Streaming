@@ -67,13 +67,13 @@
     <script>
         async function startViewing() {
             // Obtém os valores dos inputs
-            const streamName = document.getElementById('streamName').value;
-            const accountId = document.getElementById('accountId').value;
+            // const streamName = document.getElementById('streamName').value;
+            // const accountId = document.getElementById('accountId').value;
 
-            if (!streamName || !accountId) {
-                alert('Please enter both stream name and account ID');
-                return;
-            }
+            // if (!streamName || !accountId) {
+            //     alert('Please enter both stream name and account ID');
+            //     return;
+            // }
 
             // // Função para obter o token de assinatura
             // const tokenGenerator = async () => {
@@ -99,8 +99,10 @@
             // };
 
             // Step 2.1c: Set your account id and stream name while Getting Started
-const yourStreamAccountId = streamName;
-const yourStreamName = accountId;
+            
+const accountId = "p9TPVt";
+const streamName = "<%= values %>"
+console.log(streamName)
 
 // Callback to generate a subscriber token with credentials
 const tokenGenerator = () => millicast.Director.getSubscriber({

@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "s": "nodemon src/server.js"
+    "start": "nodemon src/server.js"
   },
   "dependencies": {
     "@millicast/sdk": "^0.1.46",

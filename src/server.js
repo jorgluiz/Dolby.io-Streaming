@@ -186,7 +186,6 @@ app.post('/getlist', async () => {
     },
     body: JSON.stringify({
       streamId: "p9TPVt/test", // Replace with the actual streamId
-      streamName: "test",
     })
   })
     .then(response => response.json())

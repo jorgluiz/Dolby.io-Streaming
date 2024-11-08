@@ -9,7 +9,7 @@
     <input id="streamName" type="text" value="test" />
     <button onclick="stopLive()">stop live</button>
     <button onclick="createToken()">Create Token</button>
-    <a class="links-live" href="https://dolbyio-streaming-272abf7507d6.herokuapp.com/links-live" target="_blank">links-live</a>
+    <a class="links-live" href="https://dolbyio-streaming-272abf7507d6.herokuapp.com//links-live" target="_blank">links-live</a>
     <script>
         const stopLive = () => {
             fetch('/getlist', {
@@ -19,7 +19,6 @@
                     }
             }).then(response => console.log(response)).catch(error => console.log(error))
         }
-        const servicePath = "/millicast";
 
         async function createToken() {
             const name = document.getElementById("streamName").value;
@@ -32,7 +31,7 @@
             };
 
             try {
-                const fetchResponse = await fetch(servicePath + "/createToken", {
+                const fetchResponse = await fetch("/millicast/createToken", {
                     method: "POST",
                     body: JSON.stringify(data),
                     headers: {
@@ -41,9 +40,6 @@
                 });
                 const response = await fetchResponse.json();
                 // console.log(response.data.id);
-                // console.log(response.data.label);
-                // console.log(response.data.token);
-                // console.log(response);
 
                 // Set the credentials for the streaming
                 const yourPublishingToken = response.data.token; // Token de publicação

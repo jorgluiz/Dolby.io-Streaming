@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 // Carregar variáveis de ambiente
 dotenv.config();
-import https  from "https"
-import express  from "express"
-import fs  from "fs"
-import bodyParser  from "body-parser"
-import path  from "path"
-import open  from "open"
-import {salvarDadosNoDatabase, obterDados} from "./configFirebase.js"
+import https from "https"
+import express from "express"
+import fs from "fs"
+import bodyParser from "body-parser"
+import path from "path"
+import open from "open"
+import { salvarDadosNoDatabase, obterDados } from "./firebaseService.js"
 import axios from 'axios'
 import cors from 'cors'
 import { fileURLToPath } from 'url';
@@ -36,192 +36,207 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
 // };
 
+// Serve the index page for other requests
+app.get('/', (req, res) => {
+  res.render('index');
+});
 
-const apiKey = process.env.API_KEY;
-// const PORT = '8084';
+app.get('/links-live', async (req, res) => {
+  const streamName = await obterDados()
+  res.render('live', { streamName });
+})
+
+
+
+const apiKey = process.env.API_KEY_STREAMING;
 const url = new URL('https://api.millicast.com/api/publish_token/');
 
 // Ajuste: use 'url.pathname' ao invés de 'url.path'
 const defaultOptions = {
-    protocol: url.protocol,
-    host: url.host,
-    port: url.port,
-    path: url.pathname, // Corrigido de url.path para url.pathname
-    headers: {
-        Authorization: 'Bearer ' + apiKey,
-        'Content-Type': 'application/json',
-    },
+  protocol: url.protocol,
+  host: url.host,
+  port: url.port,
+  path: url.pathname, // Corrigido de url.path para url.pathname
+  headers: {
+    Authorization: 'Bearer ' + apiKey,
+    'Content-Type': 'application/json',
+  },
 };
 
 app.post('/generateSubscriberToken', async (req, res) => {
-    const { streamName, accountId } = req.body;
+  const { streamName, accountId } = req.body;
 
-    if (!streamName || !accountId) {
-        return res.status(400).json({ error: 'Missing streamName or accountId' });
-    }
+  if (!streamName || !accountId) {
+    return res.status(400).json({ error: 'Missing streamName or accountId' });
+  }
 
-    try {
-        const response = await axios.post(`https://api.millicast.com/api/v2/streams/${accountId}/generateSubscriberToken`, {}, {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        console.log(response, "server")
+  try {
+    const response = await axios.post(`https://api.millicast.com/api/v2/streams/${accountId}/generateSubscriberToken`, {}, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log(response, "server")
 
-        const token = response.data.token;
+    const token = response.data.token;
 
-        res.json({ token });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 function createToken(data) {
-    return new Promise((resolve, reject) => {
-        if (!data) {
-            reject({ msg: 'Something went wrong.' });
-            return;
-        }
+  return new Promise((resolve, reject) => {
+    if (!data) {
+      reject({ msg: 'Something went wrong.' });
+      return;
+    }
 
-        const opts = {
-            ...defaultOptions,
-            method: 'POST',
-        };
+    const opts = {
+      ...defaultOptions,
+      method: 'POST',
+    };
 
-        const req = https.request(opts, (resp) => {
-            let result = '';
-            resp.on('data', (chunk) => {
-                result += chunk;
-            });
-            resp.on('end', () => {
-                resolve(result);
-            });
-            resp.on('error', (err) => {
-                reject(err);
-            });
-        }); 
-
-        req.write(JSON.stringify(data));
-        req.end();
+    const req = https.request(opts, (resp) => {
+      let result = '';
+      resp.on('data', (chunk) => {
+        result += chunk;
+      });
+      resp.on('end', () => {
+        resolve(result);
+      });
+      resp.on('error', (err) => {
+        reject(err);
+      });
     });
+
+    req.write(JSON.stringify(data));
+    req.end();
+  });
 }
 
 // Listen to client requests
 app.post('/millicast/:endpoint', (req, res) => {
-    const params = req.params;
+  const params = req.params;
 
-    switch (params.endpoint) {
-        case 'createToken':
-            createToken(req.body)
-                .then((data) => {
-                    const reponse = JSON.parse(data)
-                    salvarDadosNoDatabase(reponse.data.name)
-                    res.json(reponse);
-                })
-                .catch((err) => {
-                    res.status(500).json({ status: 'fail', data: err });
-                });
-            break;
-        default:
-            res.status(400).json({ status: 'error', desc: 'No endpoint specified' });
-    }
+  switch (params.endpoint) {
+    case 'createToken':
+      createToken(req.body)
+        .then((data) => {
+          const reponse = JSON.parse(data)
+          salvarDadosNoDatabase(reponse.data.name)
+          res.json(reponse);
+        })
+        .catch((err) => {
+          res.status(500).json({ status: 'fail', data: err });
+        });
+      break;
+    default:
+      res.status(400).json({ status: 'error', desc: 'No endpoint specified' });
+  }
 });
 
-// Serve the index page for other requests
-app.get('/', (req, res) => {
-    res.render('index');
-});
-
-app.get('/links-live', async (req, res) => {
-    const streamName = await obterDados()
-    res.render('live', {streamName});
-})
-
-
-// const yourPublishingToken = process.env.yourPublishingToken
-// const yourStreamName = process.env.yourStreamName
-
-// app.get('/publisher', (req, res) => {
-//     res.render('publisher', {yourPublishingToken, yourStreamName});
-// });
 
 app.get('/viewer/:streamName', async (req, res) => {
-    const streamName = req.params
-    const values = Object.values(streamName)
-   res.render('viewer', {values});
+  const streamName = req.params
+  const values = Object.values(streamName)
+  res.render('viewer', { values });
 });
 
 
 app.get('/get', async () => {
 
-        const publishingToken = 'SEU_PUBLISHING_TOKEN';
+  const publishingToken = 'SEU_PUBLISHING_TOKEN';
 
-        try {
-            const response = await fetch(`https://api.millicast.com/api/account`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+  try {
+    const response = await fetch(`https://api.millicast.com/api/account`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
 
-            const accountInfo = await response.json();
-   
-        } catch (error) {
-            console.error('Erro ao obter informações da conta:', error);
-        }
+    const accountInfo = await response.json();
+
+  } catch (error) {
+    console.error('Erro ao obter informações da conta:', error);
+  }
 })
 
 
-app.get('/getlist', async () => {
-// const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
-// const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
-// const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
-    // const urlconsult = 'https://api.millicast.com/api/account/details';
-    const urlconsult = 'https://api.millicast.com/graphql';
-    const data = {
+app.post('/getlist', async () => {
+  // const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
+  // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
+  // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
+  // const urlconsult = 'https://api.millicast.com/api/account/details';
+
+  fetch("https://api.millicast.com/api/stream/stop", {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      streamId: "p9TPVt/test", // Replace with the actual streamId
       streamName: "test",
-      streamAccountId: "9042964"
-    };
-    
-    const options = {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    };
-    
-    fetch(urlconsult)
-      .then(response => response.json())
-      .then(data => {
-        console.log('Response:', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Response:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
+
+  // const urlconsult = 'https://api.millicast.com/graphql';
+  // const data = {
+  //   streamName: "test",
+  //   streamAccountId: "9042964"
+  // };
+
+  // const options = {
+  //   method: 'POST',
+  //   headers: {
+  //     'Authorization': `Bearer ${apiKey}`,
+  //     'Accept': 'application/json',
+  //     'Content-Type': 'application/json'
+  //   },
+  //   body: JSON.stringify(data)
+  // }
+
+  // fetch(urlconsult, options)
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log('Response:', data);
+  //   })
+  //   .catch(error => {
+  //     console.error('Error:', error);
+  //   });
+
 })
 
 app.get('/getlist01', async (req, res) => {
 
-    const endpoint = 'https://api.millicast.com/graphql';
+  const endpoint = 'https://api.millicast.com/graphql';
 
-    const graphQLClient = new GraphQLClient(endpoint, {
-        headers: {
-          authorization: `Bearer ${apiKey}`,
-        },
-      });
-      
-// Defina a consulta GraphQL
-const query = gql`
+  const graphQLClient = new GraphQLClient(endpoint, {
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  // Defina a consulta GraphQL
+  const query = gql`
   query FeedFindMany($skip: Int, $limit: Int) {
     feedFindMany(skip: $skip, limit: $limit) {
     accountId
@@ -237,37 +252,37 @@ const query = gql`
 
 
 
-// Defina as variáveis para a consulta
-const variables = {
+  // Defina as variáveis para a consulta
+  const variables = {
     skip: 0,
     limit: 100
-};
+  };
 
-async function fetchFeed(res) {
+  async function fetchFeed(res) {
     try {
-        const response = await graphQLClient.request(query, variables);
-        console.log('Response:', response);
-        res.json(response);
+      const response = await graphQLClient.request(query, variables);
+      console.log('Response:', response);
+      res.json(response);
     } catch (error) {
-        console.error('GraphQL Error:', error);
-        res.status(500).json({ error: error.message });
+      console.error('GraphQL Error:', error);
+      res.status(500).json({ error: error.message });
     }
-}
+  }
 
-fetchFeed(res);
+  fetchFeed(res);
 })
 
 // Https server for serving our html files. (WebRTC requires https)
 // https.createServer(httpsOptions, app).listen(PORT, (err) => {
 //     if (err) throw err;
 //     console.log(`Secure server is listening on ${PORT}`);
-    
+
 //     // Ajuste: abrir a URL correta no navegador com https://localhost
 //     open(`https://localhost:${PORT}`); // Corrigido de http:// para https://
 // });
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`The server is now running on port ${PORT}`);
-    open(`http://localhost:${PORT}`);
+  console.log(`The server is now running on port ${PORT}`);
+  open(`http://localhost:${PORT}`);
 });

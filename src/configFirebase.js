@@ -3,12 +3,12 @@ import admin from "firebase-admin"
 import dotenv from 'dotenv'
 dotenv.config();
 
-var serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+var serviceAccount = JSON.parse(process.env.SDK_ADMIN_DO_FIREBASE);
 
 // Inicializar o Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://usuariostripe-default-rtdb.firebaseio.com/'
+  databaseURL: 'https://streaming-dolbyio-default-rtdb.firebaseio.com/'
 });
 
 // Função para salvar dados no Realtime Database

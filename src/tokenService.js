@@ -15,8 +15,7 @@ const defaultOptions = {
   headers: {
     Authorization: 'Bearer ' + apiKey,
     'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'mode': 'no-cors'
+    'Content-Type': 'application/json'
   },
 };
 

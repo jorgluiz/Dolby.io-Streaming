@@ -22,9 +22,7 @@ const __dirname = path.dirname(__filename);
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public/views"));
-
-// Serve static files from the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public folder
 
 app.use(bodyParser.json());
 app.use(cors()); // Habilita CORS para o frontend
@@ -218,10 +216,10 @@ app.get('/getlist01', async (req, res) => {
 })
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-const httpsOptions = {
-  key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-  cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-};
+// const httpsOptions = {
+//   key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+//   cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+// };
 
 // Https server for serving our html files. (WebRTC requires https)
 // https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
@@ -232,8 +230,18 @@ const httpsOptions = {
 //   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
 // });
 
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => {
+//   console.log(`The server is now running on port ${PORT}`);
+//   open(`http://localhost:${PORT}`);
+// });
+
 const PORT = process.env.PORT || 8080;
+// Apenas em desenvolvimento local, abrir o navegador automaticamente
+if (process.env.NODE_ENV !== 'production') {
+  open(`http://localhost:${PORT}`);
+}
+
 app.listen(PORT, () => {
   console.log(`The server is now running on port ${PORT}`);
-  open(`http://localhost:${PORT}`);
 });

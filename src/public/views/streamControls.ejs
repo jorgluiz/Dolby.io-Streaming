@@ -25,13 +25,15 @@
             console.log("createToken", streamName);
             if (streamName == null || streamName.length === 0) return;
 
+            const servicePath = "/millicast";
+
             const data = {
                 label: streamName,
                 streams: [{ streamName: streamName }],
             };
 
             try {
-                const fetchResponse = await fetch("/millicast/createToken", {
+                const fetchResponse = await fetch(servicePath + "/createToken", {
                     method: "POST",
                     body: JSON.stringify({data}),
                     headers: {

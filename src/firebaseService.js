@@ -13,7 +13,7 @@ admin.initializeApp({
 
 // Função para salvar dados no Realtime Database
 export function salvarDadosNoDatabase(dados) {
-  console.log(dados, "salvar aqui")
+  console.log(dados, "arquivo -> firebaseService")
   // Obter uma referência para o Realtime Database
   var database = admin.database();
 
@@ -38,6 +38,7 @@ export function obterDados() {
         const snapshot = await database.ref('/restricted_access/secret_document').once('value');
         const data = snapshot.val();
         const values = Object.values(data); // Extrair apenas os valores
+        console.log(values)
         resolve(values)
       } catch (error) {
         console.error('Erro ao obter dados:', error);

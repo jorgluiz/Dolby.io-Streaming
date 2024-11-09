@@ -6,10 +6,10 @@
 </head>
 <body>
     <label for="streamName">Stream Name</label>
-    <input id="streamName" type="text" value="test" />
+    <input id="streamName" type="text" value="" />
     <button onclick="stopLive()">stop live</button>
     <button onclick="createToken()">Create Token</button>
-    <a class="links-live" href="https://dolbyio-streaming-272abf7507d6.herokuapp.com/links-live" target="_blank">links-live</a>
+    <a class="links-live" href="http://localhost:8080/live-player" target="_blank">compartilhe link live</a>
     <script>
         const stopLive = () => {
             fetch('/getlist', {
@@ -19,27 +19,27 @@
                     }
             }).then(response => console.log(response)).catch(error => console.log(error))
         }
-        const servicePath = "/millicast";
 
         async function createToken() {
-            const name = document.getElementById("streamName").value;
-            console.log("createToken", name);
-            if (name == null || name.length === 0) return;
+            const streamName = document.getElementById("streamName").value;
+            console.log("createToken", streamName);
+            if (streamName == null || streamName.length === 0) return;
 
             const data = {
-                label: name,
-                streams: [{ streamName: name }],
+                label: streamName,
+                streams: [{ streamName: streamName }],
             };
 
             try {
-                const fetchResponse = await fetch(servicePath + "/createToken", {
+                const fetchResponse = await fetch("/millicast/createToken", {
                     method: "POST",
-                    body: JSON.stringify(data),
+                    body: JSON.stringify({data}),
                     headers: {
                         "Content-Type": "application/json",
                     },
                 });
                 const response = await fetchResponse.json();
+                console.log(response, "response")
                 // console.log(response.data.id);
                 // console.log(response.data.label);
                 // console.log(response.data.token);
@@ -47,7 +47,9 @@
 
                 // Set the credentials for the streaming
                 const yourPublishingToken = response.data.token; // Token de publicação
+                console.log(yourPublishingToken)
                 const yourStreamName = response.data.label; // Nome do stream
+                console.log(yourStreamName)
 
                 // Função assíncrona para publicar o stream
                 const startPublishing = async () => {

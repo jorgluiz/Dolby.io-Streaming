@@ -21,21 +21,21 @@
         }
 
         async function createToken() {
-            const streamName = document.getElementById("streamName").value;
-            console.log("createToken", streamName);
-            if (streamName == null || streamName.length === 0) return;
+            const name = document.getElementById("streamName").value;
+            console.log("createToken", name);
+            if (name == null || name.length === 0) return;
 
             const servicePath = "/millicast";
 
             const data = {
-                label: streamName,
-                streams: [{ streamName: streamName }],
+                label: name,
+                streams: [{ streamName: name }],
             };
 
             try {
                 const fetchResponse = await fetch(servicePath + "/createToken", {
                     method: "POST",
-                    body: JSON.stringify({data}),
+                    body: JSON.stringify(data),
                     headers: {
                         "Content-Type": "application/json",
                     },

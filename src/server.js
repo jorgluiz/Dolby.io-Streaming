@@ -223,13 +223,13 @@ app.get('/getlist01', async (req, res) => {
 // };
 
 // Https server for serving our html files. (WebRTC requires https)
-https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
-  if (err) throw err;
-  console.log(`Secure server is listening on ${process.env.PORT}`);
+// https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
+//   if (err) throw err;
+//   console.log(`Secure server is listening on ${process.env.PORT}`);
 
-  // Ajuste: abrir a URL correta no navegador com https://localhost
-  open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
-});
+//   // Ajuste: abrir a URL correta no navegador com https://localhost
+//   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
+// });
 
 // const PORT = process.env.PORT || 8080;
 // app.listen(PORT, () => {

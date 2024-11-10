@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config(); // Carregar variáveis de ambiente
+const apiKey = process.env.MILLICAST_API_KEY;
 import https from "https"
 import express from "express"
 import fs from "fs"
@@ -72,11 +73,11 @@ app.post('/generateSubscriberToken', async (req, res) => {
 // Listen to client requests
 app.post('/millicast/:endpoint', (req, res) => {
   const params = req.params;
-  // const { streamName } = req.body
+  const { streamName } = req.body
 
   switch (params.endpoint) {
     case 'createToken':
-      createToken(req.body)
+      createToken(streamName)
         .then((data) => {
           const reponse = JSON.parse(data)
           salvarDadosNoDatabase(reponse.data.name)
@@ -118,7 +119,7 @@ app.get('/get', async () => {
 })
 
 
-app.post('/getlist', async () => {
+app.post('/stop-stream', async () => {
   // const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
   // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
   // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
@@ -132,7 +133,7 @@ app.post('/getlist', async () => {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      streamId: "p9TPVt/test", // Replace with the actual streamId
+      streamId: "p9TPVt/celular", // Replace with the actual streamId
     })
   })
     .then(response => response.json())
@@ -216,19 +217,19 @@ app.get('/getlist01', async (req, res) => {
 })
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//   key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//   cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+const httpsOptions = {
+  key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+  cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+};
 
 // Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
-//   if (err) throw err;
-//   console.log(`Secure server is listening on ${process.env.PORT}`);
+https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
+  if (err) throw err;
+  console.log(`Secure server is listening on ${process.env.PORT}`);
 
-//   // Ajuste: abrir a URL correta no navegador com https://localhost
-//   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
-// });
+  // Ajuste: abrir a URL correta no navegador com https://localhost
+  open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
+});
 
 // const PORT = process.env.PORT || 8080;
 // app.listen(PORT, () => {
@@ -236,12 +237,12 @@ app.get('/getlist01', async (req, res) => {
 //   open(`http://localhost:${PORT}`);
 // });
 
-const PORT = process.env.PORT || 8080;
-// Apenas em desenvolvimento local, abrir o navegador automaticamente
-if (process.env.NODE_ENV !== 'production') {
-  open(`http://localhost:${PORT}`);
-}
+// const PORT = process.env.PORT || 8080;
+// // Apenas em desenvolvimento local, abrir o navegador automaticamente
+// if (process.env.NODE_ENV !== 'production') {
+//   open(`http://localhost:${PORT}`);
+// }
 
-app.listen(PORT, () => {
-  console.log(`The server is now running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`The server is now running on port ${PORT}`);
+// });

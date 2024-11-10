@@ -12,7 +12,7 @@
     <a class="links-live" href="http://localhost:8080/live-player" target="_blank">compartilhe link live</a>
     <script>
         const stopLive = () => {
-            fetch('/getlist', {
+            fetch('/stop-stream', {
                 method: "POST",
                 headers: {
                         "Content-Type": "application/json",
@@ -21,21 +21,14 @@
         }
 
         async function createToken() {
-            const name = document.getElementById("streamName").value;
-            console.log("createToken", name);
-            if (name == null || name.length === 0) return;
-
-            const servicePath = "/millicast";
-
-            const data = {
-                label: name,
-                streams: [{ streamName: name }],
-            };
+            const streamName = document.getElementById("streamName").value;
+            console.log("createToken", streamName);
+            if (streamName == null || streamName.length === 0) return;
 
             try {
-                const fetchResponse = await fetch(servicePath + "/createToken", {
+                const fetchResponse = await fetch("/millicast/createToken", {
                     method: "POST",
-                    body: JSON.stringify(data),
+                    body: JSON.stringify({streamName}),
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -43,15 +36,12 @@
                 const response = await fetchResponse.json();
                 console.log(response, "response")
                 // console.log(response.data.id);
-                // console.log(response.data.label);
-                // console.log(response.data.token);
-                // console.log(response);
 
                 // Set the credentials for the streaming
                 const yourPublishingToken = response.data.token; // Token de publicação
-                console.log(yourPublishingToken)
+                console.log(yourPublishingToken, "response.data.token")
                 const yourStreamName = response.data.label; // Nome do stream
-                console.log(yourStreamName)
+                console.log(yourStreamName, "response.data.token")
 
                 // Função assíncrona para publicar o stream
                 const startPublishing = async () => {

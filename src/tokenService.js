@@ -16,14 +16,20 @@ const defaultOptions = {
   host: url.host,
   path: url.pathname,
   headers: {
-    Authorization: `Bearer ${apiKey}`,
-    'Accept': 'application/json'
+    Authorization: 'Bearer ' + apiKey,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json' // Adiciona o cabeçalho Content-Type
   },
 };
 
-export function createToken(data) {
+export function createToken(streamName) {
+  const data = {
+    label: streamName,
+    streams: [{ streamName: streamName }]
+  };
+
   return new Promise((resolve, reject) => {
-    if (!data) {
+    if (!streamName) {
       reject({ msg: 'Parâmetros inválidos.' });
       return;
     }
@@ -38,18 +44,10 @@ export function createToken(data) {
       resp.on('data', (chunk) => {
         result += chunk;
       });
-
       resp.on('end', () => {
-        try {
-          const parsedResult = JSON.parse(result);
-          resolve(parsedResult);
-        } catch (err) {
-          reject({ msg: 'Erro ao parsear a resposta.', error: err });
-        }
+        resolve(result);
       });
-
       resp.on('error', (err) => {
-        console.error('Erro na resposta:', err);
         reject(err);
       });
     });

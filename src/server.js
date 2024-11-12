@@ -36,9 +36,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/live-player', async (req, res) => {
-  const streamName = await obterDados()
-  res.render('streamViewer', { streamName });
+  res.render('streamViewer');
 })
+
+// app.get('/live-player/:streamName', async (req, res) => {
+//   // const streamName = await obterDados()
+//   const streamName = req.params
+//   console.log(streamName, "live-player")
+//   res.render('streamViewer', streamName);
+// })
 
 app.get('/viewer/:streamName', async (req, res) => {
   const streamName = req.params
@@ -94,36 +100,55 @@ app.post('/millicast/:endpoint', (req, res) => {
 
 
 
-app.get('/get', async () => {
+// app.get('/get', async () => {
 
-  const publishingToken = 'SEU_PUBLISHING_TOKEN';
+//   const publishingToken = 'SEU_PUBLISHING_TOKEN';
 
-  try {
-    const response = await fetch(`https://api.millicast.com/api/account`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+//   try {
+//     const response = await fetch(`https://api.millicast.com/api/account`, {
+//       method: 'GET',
+//       headers: {
+//         'Authorization': `Bearer ${apiKey}`,
+//         'Content-Type': 'application/json'
+//       }
+//     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`);
+//     }
 
-    const accountInfo = await response.json();
+//     const accountInfo = await response.json();
 
-  } catch (error) {
-    console.error('Erro ao obter informações da conta:', error);
-  }
-})
+//   } catch (error) {
+//     console.error('Erro ao obter informações da conta:', error);
+//   }
+// })
 
-
-app.post('/stop-stream', async () => {
+app.get('/get-token-name', async () => {
   // const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
   // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
-  // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
   // const urlconsult = 'https://api.millicast.com/api/account/details';
+
+
+  fetch('https://api.millicast.com/api/publish_token/13522153', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }).then(response => response.json())
+    .then(data => {
+      console.log('Response:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+})
+
+app.post('/stop-stream', async (req, res) => {
+  const { labelName } = req.body
+  // console.log('labelName:', labelName)
 
   fetch("https://api.millicast.com/api/stream/stop", {
     method: 'POST',
@@ -133,7 +158,7 @@ app.post('/stop-stream', async () => {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      streamId: "p9TPVt/celular", // Replace with the actual streamId
+      streamId: `p9TPVt/${labelName}`, // Replace with the actual streamId
     })
   })
     .then(response => response.json())
@@ -231,18 +256,18 @@ app.get('/getlist01', async (req, res) => {
 //   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
 // });
 
-// const PORT = process.env.PORT || 8080;
-// app.listen(PORT, () => {
-//   console.log(`The server is now running on port ${PORT}`);
-//   open(`http://localhost:${PORT}`);
-// });
-
 const PORT = process.env.PORT || 8080;
-// Apenas em desenvolvimento local, abrir o navegador automaticamente
-if (process.env.NODE_ENV !== 'production') {
-  open(`http://localhost:${PORT}`);
-}
-
 app.listen(PORT, () => {
   console.log(`The server is now running on port ${PORT}`);
+  open(`http://localhost:${PORT}`);
 });
+
+// const PORT = process.env.PORT || 8080;
+// // Apenas em desenvolvimento local, abrir o navegador automaticamente
+// if (process.env.NODE_ENV !== 'production') {
+//   open(`http://localhost:${PORT}`);
+// }
+
+// app.listen(PORT, () => {
+//   console.log(`The server is now running on port ${PORT}`);
+// });

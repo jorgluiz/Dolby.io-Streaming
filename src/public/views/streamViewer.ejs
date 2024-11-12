@@ -2,138 +2,104 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador Millicast</title>
-    <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk/dist/millicast.umd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador Millicast</title>
+  <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk/dist/millicast.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
 
-        h1 {
-            color: #333;
-        }
+    h1 {
+      color: #333;
+    }
 
-        video {
-            border: 1px solid #ddd;
-            background-color: #000;
-        }
+    video {
+      border: 1px solid #ddd;
+      background-color: #000;
+    }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .controls {
-            margin-bottom: 10px;
-        }
+    .controls {
+      margin-bottom: 10px;
+    }
 
-        input {
-            margin: 5px;
-            padding: 10px;
-            font-size: 16px;
-        }
+    input {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Visualizador Millicast</h1>
-    <div class="container">
-        <div class="controls">
-            <label for="streamName">Stream Name:</label>
-            <input id="streamName" type="text" placeholder="Enter stream name" />
-            <br />
-            <label for="accountId">Account ID:</label>
-            <input id="accountId" type="text" placeholder="Enter account ID" />
-            <br />
-            <button onclick="startViewing()">Start Viewing</button>
-        </div>
-        <video id="video" width="600" height="400" controls></video>
+  <h1>Visualizador Millicast</h1>
+  <div class="container">
+    <div class="controls">
     </div>
+    <video id="video" width="600" height="400" controls></video>
+  </div>
 
-    <script>
-        async function startViewing() {
-            // Obtém os valores dos inputs
-            // const streamName = document.getElementById('streamName').value;
-            // const accountId = document.getElementById('accountId').value;
+  <script>
+    (async () => {
+      // Obtém a URL atual da página
+      const urlParams = new URLSearchParams(window.location.search);
 
-            // if (!streamName || !accountId) {
-            //     alert('Please enter both stream name and account ID');
-            //     return;
-            // }
+      // Recupera o valor de 'streamId' da URL
+      const streamId = urlParams.get('streamId');
 
-            // // Função para obter o token de assinatura
-            // const tokenGenerator = async () => {
-            //     // Substitua a URL pelo seu endpoint para gerar um token de assinatura
-            //     const response = await fetch(`/generateSubscriberToken?streamName=${encodeURIComponent(streamName)}&accountId=${encodeURIComponent(accountId)}`, {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json'
-            //         },
-            //         body: JSON.stringify({ streamName, accountId })
-            //     });
-            //     if (!response.ok) {
-            //         throw new Error(`HTTP error! Status: ${response.status}`);
-            //     }
+      // Divide o streamId para obter os valores separados
+      const [accountId, streamName] = streamId.split('/');
 
-            //     const data = await response.json();
-            //     console.log(data, "chegou aqui? data")
-            //     if (!data.token) {
-            //         throw new Error('Invalid token response');
-            //     }
+      // Callback to generate a subscriber token with credentials
+      const tokenGenerator = () => millicast.Director.getSubscriber({
+        streamName: streamName,
+        streamAccountId: accountId
+      });
 
-            //     return { token: data.token };
-            // };
+      // Cria uma nova instância do Millicast View
+      const millicastView = new window.millicast.View(streamName, tokenGenerator);
 
-            // Step 2.1c: Set your account id and stream name while Getting Started
-            
-const accountId = "p9TPVt";
-const streamName = "<%= streamName %>"
-console.log(streamName)
+      // Adiciona um ouvinte para quando um novo track chegar
+      millicastView.on('track', (event) => {
+        const video = document.getElementById('video');
+        video.srcObject = event.streams[0];
+        console.log('Stream has started.');
+        // Aqui, você pode garantir que o autoplay funcione definindo o vídeo como sem som inicialmente
+        video.muted = false;  // Certifique-se de que o vídeo está sem som
+        video.hidden = false;
+        video.play(); // Inicia a reprodução
+      });
 
-// Callback to generate a subscriber token with credentials
-const tokenGenerator = () => millicast.Director.getSubscriber({
-      streamName: streamName,
-      streamAccountId: accountId
-});
-
-            // Cria uma nova instância do Millicast View
-            const millicastView = new window.millicast.View(streamName, tokenGenerator);
-
-            // Adiciona um ouvinte para quando um novo track chegar
-            millicastView.on('track', (event) => {
-                const video = document.getElementById('video');
-                video.srcObject = event.streams[0];
-                console.log('Stream has started.');
-                videoNode.hidden = false;
-                videoNode.autoplay = true;
-            });
-
-            try {
-    await millicastView.connect();
-} catch (e) {
-    if (!millicastView.isActive()) {
-        console.log('Stream is not live, the broadcast will begin soon.');
-    }
-
-    console.log('Connection failed:', e);
-    millicastView.reconnect();
-}
+      try {
+        await millicastView.connect();
+      } catch (e) {
+        if (!millicastView.isActive()) {
+          console.log('Stream is not live, the broadcast will begin soon.');
         }
-    </script>
+
+        console.log('Connection failed:', e);
+        millicastView.reconnect();
+      }
+    })()
+  </script>
 </body>
 
 </html>

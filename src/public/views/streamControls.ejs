@@ -72,7 +72,7 @@
 
             await millicastPublish.connect({ mediaStream });
             // Example to playback with the hosted viewer
-            const viewerUrl = `http://https://dolbyio-streaming-272abf7507d6.herokuapp.com/live-player?streamId=${accountId}/${yourStreamName}`;
+            const viewerUrl = `https://dolbyio-streaming-272abf7507d6.herokuapp.com/live-player?streamId=${accountId}/${yourStreamName}`;
             document.getElementById('viewer-url').innerHTML = `<a href="${viewerUrl}" target="_new">link compartilhar live</a>`;
             console.log('Transmissão iniciada com sucesso');
           } catch (error) {

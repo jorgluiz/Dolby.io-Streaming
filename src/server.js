@@ -237,25 +237,25 @@ app.get('/getlist01', async (req, res) => {
 })
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-const httpsOptions = {
-  key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-  cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-};
+// const httpsOptions = {
+//   key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+//   cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+// };
 
 // Https server for serving our html files. (WebRTC requires https)
-https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
-  if (err) throw err;
-  console.log(`Secure server is listening on ${process.env.PORT}`);
+// https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
+//   if (err) throw err;
+//   console.log(`Secure server is listening on ${process.env.PORT}`);
 
-  // Ajuste: abrir a URL correta no navegador com https://localhost
-  open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
-});
-
-// const PORT = process.env.PORT || 8080;
-// app.listen(PORT, () => {
-//   console.log(`The server is now running on port ${PORT}`);
-//   open(`http://localhost:${PORT}`);
+//   // Ajuste: abrir a URL correta no navegador com https://localhost
+//   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
 // });
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`The server is now running on port ${PORT}`);
+  open(`http://localhost:${PORT}`);
+});
 
 // const PORT = process.env.PORT || 8080;
 // // Apenas em desenvolvimento local, abrir o navegador automaticamente

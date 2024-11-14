@@ -194,7 +194,7 @@
 
             await millicastPublish.connect({ mediaStream });
             // Example to playback with the hosted viewer
-            const viewerUrl = `https://localhost:8080/live-player?streamId=${accountId}/${yourStreamName}`;
+            const viewerUrl = `https://dolbyio-streaming-272abf7507d6.herokuapp.com/live-player?streamId=${accountId}/${yourStreamName}`;
             document.getElementById('viewer-url').innerHTML = `<a href="${viewerUrl}" target="_new"><strong>link compartilhar live</strong></a>`;
 
             const stopLive = document.querySelector('.stopLive').style.display = "inline-block";

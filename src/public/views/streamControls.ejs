@@ -199,11 +199,14 @@
 
             await millicastPublish.connect({ mediaStream });
             // Example to playback with the hosted viewer
-            const viewerUrl = `https://dolbyio-streaming-272abf7507d6.herokuapp.com/live-player?streamId=${accountId}/${yourStreamName}`;
+            const viewerUrl = `http://localhost:8080/live-player?streamId=${accountId}/${yourStreamName}`;
+            // const viewerUrl = `https://dolbyio-streaming-272abf7507d6.herokuapp.com/live-player?streamId=${accountId}/${yourStreamName}`;
             document.getElementById('viewer-url').innerHTML = `<a href="${viewerUrl}" target="_new"><strong>link compartilhar live</strong></a>`;
 
             const stopLive = document.querySelector('.stopLive').style.display = "inline-block";
             console.log('Transmissão iniciada com sucesso');
+
+
           } catch (error) {
             console.error('Erro ao iniciar a transmissão:', error);
           }
@@ -228,12 +231,23 @@
       if (millicastPublish) {
         millicastPublish.stop();  // Stop the live stream
         console.log('Transmissão encerrada');
-        localStorage.removeItem('activeLiveStream');  // Remove o item 'activeLiveStream' para permitir novas transmissões
-        location.reload();  // Optionally reload the page
+
+        // Remover o item do localStorage antes de recarregar a página
+        localStorage.removeItem('activeLiveStream');
+
+        // Aguardar um curto período antes de recarregar
+        setTimeout(() => {
+          location.reload();  // Recarregar a página após a remoção do item
+        }, 50);  // 50 ms é um tempo pequeno, suficiente para garantir que a remoção seja processada
       } else {
         console.log('Nenhuma transmissão ativa para parar');
       }
     };
+
+    // Evento de unload (limpeza da transmissão quando a página é fechada)
+    window.addEventListener('beforeunload', () => {
+      stopLive(); // Centralizando a lógica de parada da transmissão
+    });
   </script>
 </body>
 

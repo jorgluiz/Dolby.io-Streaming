@@ -95,6 +95,7 @@
             if (activeSources.size === 0) {
               statusElement.textContent = 'Status: Transmissão inativa, aguardando...';
               console.log('Transmissão inativa, mas ainda disponível.');
+              localStorage.removeItem('activeLiveStream');  // esse localStorage foi criado onde foi iniciada a transmissão caso o usuario pare a transmissão o localStorage.removeItem removerá ou caso usuario feche a pagina de transmissão também o localStorage.removeItem removerá
               video.srcObject = null; // Remove a fonte de vídeo
             }
             break;

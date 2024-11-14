@@ -124,13 +124,10 @@ app.post('/millicast/:endpoint', (req, res) => {
 //   }
 // })
 
-app.get('/get-token-name', async () => {
-  // const response = await fetch(`https://api.millicast.com/api/publish_token/list?sortBy=AddedOn&page=1&itemsOnPage=30&isDescending=true`, {
-  // const response = await fetch(`https://api.millicast.com/api/publish_token/9037185`, {
-  // const urlconsult = 'https://api.millicast.com/api/account/details';
+app.post('/get-token-name', async (req, res) => {
+  const { token } = req.body
 
-
-  fetch('https://api.millicast.com/api/publish_token/13522153', {
+  fetch(`https://api.millicast.com/api/publish_token/${token}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -168,34 +165,32 @@ app.post('/stop-stream', async (req, res) => {
     .catch(error => {
       console.error('Error:', error);
     });
-
-
-  // const urlconsult = 'https://api.millicast.com/graphql';
-  // const data = {
-  //   streamName: "test",
-  //   streamAccountId: "9042964"
-  // };
-
-  // const options = {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${apiKey}`,
-  //     'Accept': 'application/json',
-  //     'Content-Type': 'application/json'
-  //   },
-  //   body: JSON.stringify(data)
-  // }
-
-  // fetch(urlconsult, options)
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     console.log('Response:', data);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error:', error);
-  //   });
-
 })
+
+// const urlconsult = 'https://api.millicast.com/graphql';
+// const data = {
+//   streamName: "test",
+//   streamAccountId: "9042964"
+// };
+
+// const options = {
+//   method: 'POST',
+//   headers: {
+//     'Authorization': `Bearer ${apiKey}`,
+//     'Accept': 'application/json',
+//     'Content-Type': 'application/json'
+//   },
+//   body: JSON.stringify(data)
+// }
+
+// fetch(urlconsult, options)
+//   .then(response => response.json())
+//   .then(data => {
+//     console.log('Response:', data);
+//   })
+//   .catch(error => {
+//     console.error('Error:', error);
+//   });
 
 app.get('/getlist01', async (req, res) => {
 
@@ -242,25 +237,25 @@ app.get('/getlist01', async (req, res) => {
 })
 
 // Define as opções para o servidor HTTPS, especificando a chave privada e o certificado SSL.
-// const httpsOptions = {
-//   key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
-//   cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
-// };
+const httpsOptions = {
+  key: fs.readFileSync(path.resolve(__dirname, './certs', 'server.key')),
+  cert: fs.readFileSync(path.resolve(__dirname, './certs', 'server.cert'))
+};
 
 // Https server for serving our html files. (WebRTC requires https)
-// https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
-//   if (err) throw err;
-//   console.log(`Secure server is listening on ${process.env.PORT}`);
+https.createServer(httpsOptions, app).listen(process.env.PORT, (err) => {
+  if (err) throw err;
+  console.log(`Secure server is listening on ${process.env.PORT}`);
 
-//   // Ajuste: abrir a URL correta no navegador com https://localhost
-//   open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
-// });
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`The server is now running on port ${PORT}`);
-  open(`http://localhost:${PORT}`);
+  // Ajuste: abrir a URL correta no navegador com https://localhost
+  open(`https://localhost:${process.env.PORT}`); // Corrigido de http:// para https://
 });
+
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => {
+//   console.log(`The server is now running on port ${PORT}`);
+//   open(`http://localhost:${PORT}`);
+// });
 
 // const PORT = process.env.PORT || 8080;
 // // Apenas em desenvolvimento local, abrir o navegador automaticamente

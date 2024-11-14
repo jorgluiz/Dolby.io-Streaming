@@ -12,6 +12,143 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 0;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    video {
+      width: 100%;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .controls {
+      margin-bottom: 10px;
+    }
+
+    input {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #555;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Visualizador Millicast</h1>
+  <div class="container">
+    <div class="controls"></div>
+    <video id="video" controls></video>
+    <div id="status" class="status">Status: Aguardando transmissão...</div>
+  </div>
+
+  <script>
+    (async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const streamId = urlParams.get('streamId');
+      const [accountId, streamName] = streamId.split('/');
+      const statusElement = document.getElementById('status');
+      const video = document.getElementById('video');
+
+      const tokenGenerator = () => millicast.Director.getSubscriber({
+        streamName: streamName,
+        streamAccountId: accountId
+      });
+
+      const millicastView = new window.millicast.View(streamName, tokenGenerator);
+
+      const activeSources = new Set();
+
+      millicastView.on('broadcastEvent', (event) => {
+        console.log("Evento broadcastEvent recebido:", event); // Log adicional
+        const { name, data } = event;
+        switch (name) {
+          case 'active':
+            activeSources.add(data.sourceId);
+            statusElement.textContent = 'Status: Transmissão ativa.';
+            console.log('Transmissão ativa.');
+            break;
+          case 'inactive':
+            activeSources.delete(data.sourceId);
+            if (activeSources.size === 0) {
+              statusElement.textContent = 'Status: Transmissão inativa, aguardando...';
+              console.log('Transmissão inativa, mas ainda disponível.');
+              video.srcObject = null; // Remove a fonte de vídeo
+            }
+            break;
+          case 'stopped':
+            statusElement.textContent = 'Status: Transmissão finalizada.';
+            console.log('Transmissão parada e não disponível.');
+            break;
+          default:
+            console.log("Evento não tratado:", name); // Log para eventos desconhecidos
+            break;
+        }
+      });
+
+      millicastView.on('track', (event) => {
+        const video = document.getElementById('video');
+        video.srcObject = event.streams[0];
+        console.log('Stream has started.');
+        video.muted = false;
+        video.hidden = false;
+        video.play();  // O autoplay pode funcionar agora com o som desativado
+      });
+
+      try {
+        await millicastView.connect({ events: ['active', 'inactive', 'stopped'] });
+      } catch (e) {
+        if (!millicastView.isActive()) {
+          statusElement.textContent = 'Status: Transmissão não está ao vivo no momento.';
+          console.log('A transmissão ainda não está ao vivo.');
+        }
+        console.error('Falha na conexão:', e);
+        millicastView.reconnect();
+      }
+    })();
+  </script>
+</body>
+
+</html>
+
+<!-- projeto 1.0 @@@@@@@@@@@@@@@@ -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador Millicast</title>
+  <script src="https://cdn.jsdelivr.net/npm/@millicast/sdk/dist/millicast.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 20px;
       background-color: #f0f0f0;
     }
@@ -89,7 +226,9 @@
       });
 
       try {
-        await millicastView.connect();
+        await millicastView.connect({
+          events: ['stopped']
+        });
       } catch (e) {
         if (!millicastView.isActive()) {
           console.log('Stream is not live, the broadcast will begin soon.');
@@ -102,4 +241,4 @@
   </script>
 </body>
 
-</html>
+</html> -->

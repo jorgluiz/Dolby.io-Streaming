@@ -157,6 +157,12 @@
     }
 
     async function createToken() {
+      // Verifica se já existe uma transmissão ativa
+      if (localStorage.getItem('activeLiveStream')) {
+        alert("Você já possui uma transmissão ativa.");
+        return;
+      }
+
       const streamName = document.getElementById("streamName").value;
       if (!streamName) return;
 
@@ -169,9 +175,8 @@
 
         const response = await fetchResponse.json();
         localStorage.setItem("token", response.data.id)
-        // Armazena o labelName no localStorage e atualiza o link de compartilhamento
-        localStorage.setItem('labelName', response.data.label);
-
+        localStorage.setItem('labelName', response.data.label); // Armazena o labelName no localStorage e atualiza o link de compartilhamento
+        localStorage.setItem('activeLiveStream', true); // Salva no localStorage que uma live está ativa
         // Set up and start publishing
         const yourPublishingToken = response.data.token;
         const yourStreamName = response.data.label;
@@ -223,6 +228,7 @@
       if (millicastPublish) {
         millicastPublish.stop();  // Stop the live stream
         console.log('Transmissão encerrada');
+        localStorage.removeItem('activeLiveStream');  // Remove o item 'activeLiveStream' para permitir novas transmissões
         location.reload();  // Optionally reload the page
       } else {
         console.log('Nenhuma transmissão ativa para parar');

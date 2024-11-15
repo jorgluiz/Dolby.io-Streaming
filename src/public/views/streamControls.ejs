@@ -229,24 +229,19 @@
     // Stop the live stream
     const stopLive = () => {
       if (millicastPublish) {
-        millicastPublish.stop();  // Stop the live stream
+        millicastPublish.stop();  // Encerrar a transmissão
         console.log('Transmissão encerrada');
-
-        // Remover o item do localStorage antes de recarregar a página
-        localStorage.removeItem('activeLiveStream');
-
-        // Aguardar um curto período antes de recarregar
-        setTimeout(() => {
-          location.reload();  // Recarregar a página após a remoção do item
-        }, 50);  // 50 ms é um tempo pequeno, suficiente para garantir que a remoção seja processada
+        localStorage.removeItem('activeLiveStream'); // Remover indicador de transmissão ativa
       } else {
         console.log('Nenhuma transmissão ativa para parar');
       }
     };
 
-    // Evento de unload (limpeza da transmissão quando a página é fechada)
-    window.addEventListener('beforeunload', () => {
-      stopLive(); // Centralizando a lógica de parada da transmissão
+    // Evento de descarte da página
+    window.addEventListener('beforeunload', (event) => {
+      stopLive(); // Parar a transmissão ao fechar ou atualizar a página
+      // Para garantir que o item seja removido e o log seja visível
+      event.preventDefault();
     });
   </script>
 </body>

@@ -23,6 +23,7 @@
 
     video {
       width: 100%;
+      background-color: #333;
     }
 
     .container {
@@ -113,7 +114,7 @@
         const video = document.getElementById('video');
         video.srcObject = event.streams[0];
         console.log('Stream has started.');
-        video.muted = false;
+        video.muted = true;
         video.hidden = false;
         video.play();  // O autoplay pode funcionar agora com o som desativado
       });

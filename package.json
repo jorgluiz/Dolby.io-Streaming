@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "start": "nodemon src/server.js"
+    "dev": "node --watch src/server.js"
   },
   "dependencies": {
     "@millicast/sdk": "^0.1.46",
@@ -18,7 +18,5 @@
     "open": "8.4.0",
     "path": "^0.12.7"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
-  }
+  "devDependencies": {}
 }

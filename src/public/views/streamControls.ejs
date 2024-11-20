@@ -22,14 +22,14 @@
     cursor: pointer;
     border: none;
     border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    /* Adicione transições suaves */
   }
 
   .createToken:hover {
-    background-color: rgb(22, 22, 212);
     transform: translateY(-2px);
-    /* Efeito de movimento para baixo quando pressionado */
-    box-shadow: 0 2px #0056b3;
-    /* A sombra diminui quando pressionado */
+    box-shadow: 0 2px #030c14ab;
+    /* background-color: rgb(22, 22, 212); */
   }
 
   label {
@@ -47,15 +47,14 @@
     color: #f0f0f0;
     border: none;
     border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
   }
 
   .stopLive:hover {
     bottom: 10px;
-    background-color: rgb(207, 54, 54);
     transform: translateY(-2px);
-    /* Efeito de movimento para baixo quando pressionado */
-    box-shadow: 0 2px #0056b3;
-    /* A sombra diminui quando pressionado */
+    box-shadow: 0 2px #030c14ab;
+    background-color: rgb(207, 54, 54);
   }
 
   .container {
@@ -125,8 +124,8 @@
   <div class="container">
     <label for="streamName">Stream Name</label>
     <input id="streamName" type="text" value="" />
-    <button class="createToken" onclick="createToken()">Create Token</button>
-    <button class="stopLive" onclick="stopLive()">Stop Live</button>
+    <button class="createToken" onclick="createToken()">CREATE TOKEN</button>
+    <button class="stopLive" onclick="stopLive()">STOP LIVE</button>
     <div style="display: flex; flex-direction: column;">
       <!-- <div>
         <button onclick="obtertoken()">OBTERTOKEN</button>
